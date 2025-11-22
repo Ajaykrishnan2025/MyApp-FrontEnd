@@ -5,7 +5,7 @@ import Login from "./pages/Login.jsx";
 import EmailVerify from "./pages/EmailVerify.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import Chatbot from "./pages/Chatbot.jsx";
-import PrivateRoute from "./components/PrivateRoute.jsx";  // ✔ Correct
+import PrivateRoute from "./components/PrivateRoute.jsx";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import GeminiChatPage from "./components/GeminiChatPage.jsx";
@@ -21,22 +21,8 @@ const App = () => (
       <Route path="/reset-password" element={<ResetPassword />} />
 
       {/* Protected Routes */}
-      <Route
-        path="/chatbot"
-        element={
-          <PrivateRoute>
-            <Chatbot />
-          </PrivateRoute>
-        }
-      />
-      <Route
-        path="/chat"
-        element={
-          <PrivateRoute>
-            <GeminiChatPage />
-          </PrivateRoute>
-        }
-      />
+      <Route path="/chatbot" element={<PrivateRoute><Chatbot /></PrivateRoute>} />
+      <Route path="/chat" element={<PrivateRoute><GeminiChatPage /></PrivateRoute>} />
     </Routes>
   </div>
 );
