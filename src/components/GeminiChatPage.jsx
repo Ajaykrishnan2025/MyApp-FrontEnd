@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Sidebar from "./Sidebar";
+import Sidebar from "./Sidebar"; // ✔ must match the filename exactly
 import PromptCard from "./PromptCard";
 import { Navigate } from "react-router-dom";
 import { assets } from "../assets/assets";
