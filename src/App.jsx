@@ -4,7 +4,7 @@ import Home from "./pages/Home.jsx";
 import Login from "./pages/Login.jsx";
 import EmailVerify from "./pages/EmailVerify.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
-import Chatbot from "./pages/chatbot.jsx";
+import Chatbot from "./pages/Chatbot.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";  // ✔ Correct
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
