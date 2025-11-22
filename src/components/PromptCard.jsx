@@ -11,3 +11,4 @@ const PromptCard = ({ text }) => {
 };
 
 export default PromptCard;
+

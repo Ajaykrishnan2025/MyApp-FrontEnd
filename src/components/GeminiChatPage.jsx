@@ -1,21 +1,12 @@
+// 📁 client/src/components/GeminiChatPage.jsx
 import React, { useState, useEffect, useRef } from "react";
-import Sidebar from "./Sidebar"; // ✔ must match the filename exactly
-import PromptCard from "./PromptCard";
+import Sidebar from "./Sidebar.jsx";
+import PromptCard from "./PromptCard.jsx";
+import PrivateRoute from "./PrivateRoute.jsx";
+import { assets } from "../assets/assets.js";
 import { Navigate } from "react-router-dom";
-import { assets } from "../assets/assets";
 
-<img src={assets.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
-
-
-const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const isVerified = localStorage.getItem("isVerified") === "true";
-  if (!token) return <Navigate to="/login" />;
-  if (!isVerified) return <Navigate to="/email-verify" />;
-  return children;
-};
-
-const GeminiChatPage = () => { 
+const GeminiChatPage = () => {
   const [inputPrompt, setInputPrompt] = useState("");
   const [chatHistory, setChatHistory] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,37 +19,31 @@ const GeminiChatPage = () => {
     "Improve the readability of the following code",
   ];
 
-const sendPromptToGemini = async (prompt) => {
-  const backendUrl = "http://localhost:4000/api/chat"; 
+  const sendPromptToGemini = async (prompt) => {
+    const backendUrl = process.env.REACT_APP_BACKEND_URL || "http://localhost:4000";
 
-  try {
-    const response = await fetch(backendUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ message: prompt }),
-    });
+    try {
+      const response = await fetch(`${backendUrl}/api/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: prompt }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      console.error("❌ Backend responded with error:", data);
-
-      // ✅ Minimal addition: handle 403 or other errors
-      if (response.status === 403) {
-        return "Your Gemini API key is invalid or leaked. Please update the key.";
+      if (!response.ok) {
+        if (response.status === 403) {
+          return "Your Gemini API key is invalid or leaked. Please update the key.";
+        }
+        return data.error || "Sorry, the AI server had a problem. Please try again later.";
       }
 
-      return data.error || "Sorry, the AI server had a problem. Please try again later.";
+      return data.reply || "No response from Gemini model.";
+    } catch (error) {
+      console.error("Error fetching from backend:", error);
+      return "Sorry, I'm having trouble connecting to the backend. Please make sure it's running.";
     }
-
-    return data.reply || "No response from Gemini model.";
-  } catch (error) {
-    console.error("Error fetching from backend:", error);
-    return "Sorry, I'm having trouble connecting to the backend. Please make sure it's running.";
-  }
-};
+  };
 
   const handleSendPrompt = async () => {
     if (!inputPrompt.trim() || isLoading) return;
@@ -74,16 +59,16 @@ const sendPromptToGemini = async (prompt) => {
       setChatHistory((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error("Error sending prompt:", error);
-      const errorMessage = { role: "model", content: "Sorry, I ran into an error. Please try again." };
-      setChatHistory((prev) => [...prev, errorMessage]);
+      setChatHistory((prev) => [
+        ...prev,
+        { role: "model", content: "Sorry, I ran into an error. Please try again." },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handlePromptCardClick = (promptText) => {
-    setInputPrompt(promptText);
-  };
+  const handlePromptCardClick = (promptText) => setInputPrompt(promptText);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -91,10 +76,8 @@ const sendPromptToGemini = async (prompt) => {
 
   return (
     <PrivateRoute>
-      {/* ✅ Fixed: text color now visible on dark background */}
       <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white">
         <div className="max-w-6xl mx-auto py-8 px-4">
-          {/* ✅ Added text-gray-800 so inside card text is visible */}
           <div
             className="bg-white text-gray-800 rounded-2xl overflow-hidden shadow-xl flex"
             style={{ height: "calc(100vh - 4rem)" }}
@@ -115,8 +98,11 @@ const sendPromptToGemini = async (prompt) => {
                         </p>
                       </div>
                       <div className="flex items-center space-x-3">
-                       <img src={assets.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
-
+                        <img
+                          src={assets.avatar}
+                          alt="avatar"
+                          className="w-12 h-12 rounded-full object-cover"
+                        />
                       </div>
                     </header>
                     <section className="mt-12">
@@ -160,6 +146,7 @@ const sendPromptToGemini = async (prompt) => {
                   </div>
                 )}
               </div>
+
               <footer className="mt-8">
                 <div className="bg-gray-50 border border-gray-100 rounded-full px-4 py-3 flex items-center shadow-sm">
                   <input
