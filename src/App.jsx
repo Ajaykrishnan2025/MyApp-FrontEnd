@@ -6,9 +6,9 @@ import EmailVerify from "./pages/EmailVerify.jsx";
 import ResetPassword from "./pages/ResetPassword.jsx";
 import Chatbot from "./pages/chatbot.jsx";
 import PrivateRoute from "./components/PrivateRoute.jsx";  // ✔ Correct
-import GeminiChatPage from "./components/GeminiChatPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GeminiChatPage from "./components/GeminiChatPage.jsx";
 
 const App = () => (
   <div>
