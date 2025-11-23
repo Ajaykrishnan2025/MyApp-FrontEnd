@@ -1,12 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { AppContext } from "../context/AppContext";
 
 const Chatbot = () => {
   const navigate = useNavigate();
+  const { isLoggedin, userData } = useContext(AppContext); // ✅ use AppContext
   const [messages, setMessages] = useState([
-    { sender: "bot", text: "👋 Hey Ajay! I'm your AI assistant. How can I help you today?" },
+    { sender: "bot", text: "👋 Hey! I'm your AI assistant. How can I help you today?" },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,13 +16,12 @@ const Chatbot = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000";
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const verified = localStorage.getItem("isVerified");
-    if (!token || verified !== "true") {
-      toast.error("Please verify your account to use the chatbot.");
+    // ✅ redirect if not logged in or no user data
+    if (!isLoggedin || !userData) {
+      toast.error("Please login to use the chatbot.");
       navigate("/login");
     }
-  }, [navigate]);
+  }, [isLoggedin, userData, navigate]);
 
   const sendMessage = async (e) => {
     e.preventDefault();

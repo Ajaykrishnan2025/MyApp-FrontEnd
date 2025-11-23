@@ -18,7 +18,8 @@ const GeminiChatPage = () => {
     "Improve the readability of the following code",
   ];
 
-  const backendUrl = process.env.REACT_APP_BACKEND_URL;
+  // ✅ Correct for Vite
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   const sendPromptToGemini = async (prompt) => {
     try {
@@ -27,6 +28,7 @@ const GeminiChatPage = () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: prompt }),
       });
+
       const data = await res.json();
       if (!res.ok) return data.error || "Server error";
       return data.reply || "No response";
@@ -38,6 +40,7 @@ const GeminiChatPage = () => {
 
   const handleSendPrompt = async () => {
     if (!inputPrompt.trim() || isLoading) return;
+
     const userMessage = { role: "user", content: inputPrompt };
     setChatHistory([...chatHistory, userMessage]);
     setInputPrompt("");
@@ -68,7 +71,7 @@ const GeminiChatPage = () => {
                     <header className="flex justify-between items-start">
                       <div>
                         <h1 className="text-4xl md:text-5xl font-extrabold">
-                          <span className="text-blue-500">Hello,</span> 
+                          <span className="text-blue-500">Hello,</span>
                           <span className="text-pink-500"> GeminiChatbot 🤖</span>
                         </h1>
                         <p className="mt-2 text-xl text-gray-400">
@@ -77,6 +80,7 @@ const GeminiChatPage = () => {
                       </div>
                       <img src={assets.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover" />
                     </header>
+
                     <section className="mt-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                       {samplePrompts.map((prompt, i) => (
                         <PromptCard key={i} text={prompt} onClick={() => handlePromptCardClick(prompt)} />
@@ -87,16 +91,26 @@ const GeminiChatPage = () => {
                   <div className="space-y-6">
                     {chatHistory.map((msg, idx) => (
                       <div key={idx} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                        <div className={`p-4 rounded-2xl max-w-lg ${msg.role === "user" ? "bg-blue-500 text-white rounded-br-none" : "bg-gray-700 text-white rounded-bl-none"}`}>
+                        <div
+                          className={`p-4 rounded-2xl max-w-lg ${
+                            msg.role === "user"
+                              ? "bg-blue-500 text-white rounded-br-none"
+                              : "bg-gray-700 text-white rounded-bl-none"
+                          }`}
+                        >
                           <p style={{ whiteSpace: "pre-wrap" }}>{msg.content}</p>
                         </div>
                       </div>
                     ))}
+
                     {isLoading && (
                       <div className="flex justify-start">
-                        <div className="p-4 rounded-2xl max-w-lg bg-gray-700 text-blue-400 rounded-bl-none">Gemini is thinking...</div>
+                        <div className="p-4 rounded-2xl max-w-lg bg-gray-700 text-blue-400 rounded-bl-none">
+                          Gemini is thinking...
+                        </div>
                       </div>
                     )}
+
                     <div ref={chatEndRef} />
                   </div>
                 )}
@@ -109,7 +123,12 @@ const GeminiChatPage = () => {
                     placeholder="Enter a prompt here"
                     value={inputPrompt}
                     onChange={(e) => setInputPrompt(e.target.value)}
-                    onKeyPress={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSendPrompt(); } }}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        handleSendPrompt();
+                      }
+                    }}
                   />
                   <button
                     className="ml-2 bg-blue-600 text-white px-4 py-2 rounded-full disabled:bg-blue-300"

@@ -31,9 +31,9 @@ const Header = () => {
       </p>
 
       {/* Button */}
-      {/* <button className="border border-gray-500 rounded-full px-8 py-2.5 hover:bg-gray-100 transition-all">
+      <button className="border border-gray-500 rounded-full px-8 py-2.5 hover:bg-gray-100 transition-all">
         Get Started
-      </button> */}
+      </button>
     </div>
   );
 };

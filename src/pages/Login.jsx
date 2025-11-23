@@ -1,8 +1,8 @@
 import React, { useContext, useState } from "react";
-import axios from "axios";
 import { AppContext } from "../context/AppContext";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const Login = () => {
   const { setIsLoggedin, getUserData } = useContext(AppContext);
@@ -10,7 +10,7 @@ const Login = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const navigate = useNavigate();
 
-  axios.defaults.withCredentials = true; // ✅ ensure cookies sent
+  axios.defaults.withCredentials = true;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,7 +21,9 @@ const Login = () => {
     e.preventDefault();
     try {
       if (state === "Sign Up") {
-        const { data } = await axios.post("/api/auth/register", formData);
+        const { data } = await axios.post("/api/auth/register", formData, {
+          withCredentials: true,
+        });
 
         if (data.success) {
           toast.success("Registered successfully! Please verify your email.");
@@ -29,12 +31,12 @@ const Login = () => {
           navigate("/email-verify");
         } else toast.error(data.message);
       } else {
-        const { data } = await axios.post("/api/auth/login", {
-          email: formData.email,
-          password: formData.password,
-        });
+        const { data } = await axios.post(
+          "/api/auth/login",
+          { email: formData.email, password: formData.password },
+          { withCredentials: true }
+        );
 
-        // ✅ ignore backend 400 message in console, show toast only
         if (!data.success && data.message === "Please verify your email before login") {
           toast.warning(data.message);
           localStorage.setItem("verifyEmail", formData.email);
@@ -43,16 +45,14 @@ const Login = () => {
         }
 
         if (data.success) {
-          toast.success("Login successful!");
+          await getUserData(); // ✅ fetch userData first
           setIsLoggedin(true);
-          await getUserData();
-          localStorage.setItem("token", data.token);
           localStorage.setItem("isVerified", "true");
+          toast.success("Login successful!");
           navigate("/");
         } else toast.error(data.message);
       }
     } catch (error) {
-      // ✅ only show toast, no console.log for 400
       toast.error(error.response?.data?.message || "Something went wrong");
     }
   };

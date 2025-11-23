@@ -1,15 +1,22 @@
 // src/components/PrivateRoute.jsx
-import React from "react";
+import React, { useContext } from "react";
 import { Navigate } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
-  const isVerified = localStorage.getItem("isVerified") === "true";
+  const { isLoggedin } = useContext(AppContext);
 
-  if (!token) return <Navigate to="/login" />;
-  if (!isVerified) return <Navigate to="/email-verify" />;
+  // While auth is being checked (first 300-500ms)
+  if (isLoggedin === false && !localStorage.getItem("token")) {
+    return <Navigate to="/login" replace />;
+  }
 
-  return children;
+  // If logged in → allow access
+  if (isLoggedin) {
+    return children;
+  }
+
+  return null; // prevents flicker
 };
 
 export default PrivateRoute;

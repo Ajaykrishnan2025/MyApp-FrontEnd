@@ -1,14 +1,12 @@
-/* src/index.css */
+/* client/src/index.css */
 
-/* Google Fonts */
+/* Google Fonts (keep if needed) */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&family=Outfit:wght@100..900&family=Roboto:ital,wdth,wght@0,75..100,100..900;1,75..100,100..900&display=swap');
 
-/* Tailwind */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 import */
+@import "tailwindcss";
 
-/* Global font */
+/* Optional custom styles */
 body {
-  font-family: "Montserrat", sans-serif;
+  font-family: 'Roboto', sans-serif;
 }

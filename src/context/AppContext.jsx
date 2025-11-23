@@ -1,95 +1,62 @@
+// src/context/AppContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-// ✅ Live backend URL
-export const backendUrl = "https://auth-backend-4osh.onrender.com";
+export const backendUrl = "http://localhost:4000"; // ✅ correct backend
+
+axios.defaults.withCredentials = true;
+axios.defaults.baseURL = backendUrl;
+axios.defaults.headers.common["Content-Type"] = "application/json";
 
 export const AppContextProvider = ({ children }) => {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [loadingUser, setLoadingUser] = useState(true); // ✅ new loading flag
 
-  // ✅ Send cookies with every request
-  axios.defaults.withCredentials = true;
-
-  // ----------------------
-  // Check Auth
-  // ----------------------
   const getAuthState = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/auth/is-auth`);
+      const { data } = await axios.get("/api/auth/is-auth");
 
       if (data.success) {
+        await getUserData(); // fetch userData first
         setIsLoggedin(true);
-        await getUserData();
       } else {
         setIsLoggedin(false);
         setUserData(null);
       }
     } catch (error) {
-      // ✅ Only log unexpected errors
-      if (!error.response || error.response.status !== 401) {
-        console.error("Auth check response error:", error);
-      }
       setIsLoggedin(false);
       setUserData(null);
+    } finally {
+      setLoadingUser(false); // ✅ done loading
     }
   };
 
-  // ----------------------
-  // Get User Data
-  // ----------------------
   const getUserData = async () => {
     try {
-      const { data } = await axios.get(`${backendUrl}/api/user/data`);
+      const { data } = await axios.get("/api/user/data");
 
       if (data.success) {
-        setUserData(data.userData || data.user || data);
+        setUserData(data.userData || data.user);
       } else {
-        toast.error(data.message || "Failed to fetch user data");
+        toast.error("Failed to load user data");
       }
     } catch (error) {
-      // ✅ Ignore 401 errors silently
-      if (!error.response || error.response.status !== 401) {
-        toast.error(error.response?.data?.message || "Failed to fetch user data");
-      }
+      console.error("User data error:", error);
     }
   };
 
-  // ----------------------
-  // On mount: check auth
-  // ----------------------
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const isVerified = localStorage.getItem("isVerified") === "true";
-
-    if (token && isVerified) {
-      setIsLoggedin(true);
-    }
-
-    getAuthState();
-  }, []);
-
-  // ----------------------
-  // Login function (example usage)
-  // ----------------------
   const login = async (email, password) => {
-    if (!email || !password) {
-      toast.error("Email and password are required");
-      return;
-    }
-
     try {
-      const { data } = await axios.post(`${backendUrl}/api/auth/login`, { email, password });
+      const { data } = await axios.post("/api/auth/login", { email, password });
 
       if (data.success) {
-        localStorage.setItem("token", data.token || "");
-        localStorage.setItem("isVerified", "true");
-
+        await getUserData(); // ✅ fetch userData first
         setIsLoggedin(true);
-        await getUserData();
+        localStorage.setItem("isVerified", "true");
         toast.success("Login successful");
       } else {
         toast.error(data.message || "Login failed");
@@ -99,6 +66,28 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
+  const logout = async () => {
+    try {
+      const { data } = await axios.post("/api/auth/logout");
+
+      if (data.success) {
+        setIsLoggedin(false);
+        setUserData(null);
+
+        localStorage.removeItem("token");
+        localStorage.removeItem("isVerified");
+
+        toast.success("Logged out");
+      }
+    } catch (error) {
+      toast.error("Logout failed");
+    }
+  };
+
+  useEffect(() => {
+    getAuthState();
+  }, []);
+
   const value = {
     isLoggedin,
     setIsLoggedin,
@@ -106,7 +95,9 @@ export const AppContextProvider = ({ children }) => {
     setUserData,
     getUserData,
     backendUrl,
-    login, // Export login for usage in components
+    login,
+    logout,
+    loadingUser, // ✅ export flag
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
