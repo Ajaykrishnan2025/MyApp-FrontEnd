@@ -1,13 +1,14 @@
+// src/context/AppContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-// ✅ Updated backend URL
+// ✅ Updated backend URL to Render
 export const backendUrl = "https://auth-backend-rr3t.onrender.com";
 
-axios.defaults.withCredentials = true; // ✅ must be true for cross-site cookies
+axios.defaults.withCredentials = true; // ✅ ensure cookies sent
 axios.defaults.baseURL = backendUrl;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
@@ -18,7 +19,8 @@ export const AppContextProvider = ({ children }) => {
 
   const getAuthState = async () => {
     try {
-      const { data } = await axios.get("/api/auth/is-auth"); // ✅ withCredentials ensures cookie sent
+      // ✅ FIXED ROUTE
+      const { data } = await axios.get("/api/auth/is-auth", { withCredentials: true });
 
       if (data.success) {
         await getUserData();
@@ -37,7 +39,8 @@ export const AppContextProvider = ({ children }) => {
 
   const getUserData = async () => {
     try {
-      const { data } = await axios.get("/api/user/data", { withCredentials: true }); // ✅ important
+      // ✅ send cookies for cross-site request
+      const { data } = await axios.get("/api/user/data", { withCredentials: true });
 
       if (data.success) {
         setUserData(data.userData || data.user);
