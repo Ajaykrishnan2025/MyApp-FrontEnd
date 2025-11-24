@@ -9,8 +9,7 @@ export const AppContext = createContext();
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 axios.defaults.baseURL = backendUrl;
-
-// ✅ Include credentials for cookies to work cross-site
+// ✅ Include credentials for cross-site cookies
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
@@ -24,7 +23,9 @@ export const AppContextProvider = ({ children }) => {
   // -------------------------
   const getAuthState = async () => {
     try {
-      const { data } = await axios.get("/api/auth/is-auth");
+      const { data } = await axios.get("/api/auth/is-auth", {
+        withCredentials: true,
+      });
 
       if (data.success) {
         await getUserData();
@@ -47,15 +48,19 @@ export const AppContextProvider = ({ children }) => {
   // -------------------------
   const getUserData = async () => {
     try {
-      const { data } = await axios.get("/api/user/data");
+      const { data } = await axios.get("/api/user/data", {
+        withCredentials: true, // ✅ ensures cookie sent
+      });
 
       if (data.success) {
         setUserData(data.userData || data.user);
       } else {
         toast.error("Failed to load user data");
+        setUserData(null);
       }
     } catch (error) {
       console.error("User data error:", error);
+      setUserData(null);
     }
   };
 
@@ -64,7 +69,11 @@ export const AppContextProvider = ({ children }) => {
   // -------------------------
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post("/api/auth/login", { email, password });
+      const { data } = await axios.post(
+        "/api/auth/login",
+        { email, password },
+        { withCredentials: true }
+      );
 
       if (data.success) {
         await getUserData();
@@ -74,6 +83,7 @@ export const AppContextProvider = ({ children }) => {
         toast.error(data.message || "Login failed");
       }
     } catch (error) {
+      console.error("Login error:", error);
       toast.error(error.response?.data?.message || "Login error");
     }
   };
@@ -83,7 +93,11 @@ export const AppContextProvider = ({ children }) => {
   // -------------------------
   const logout = async () => {
     try {
-      const { data } = await axios.post("/api/auth/logout");
+      const { data } = await axios.post(
+        "/api/auth/logout",
+        {},
+        { withCredentials: true }
+      );
 
       if (data.success) {
         setIsLoggedin(false);
@@ -91,6 +105,7 @@ export const AppContextProvider = ({ children }) => {
         toast.success("Logged out");
       }
     } catch (error) {
+      console.error("Logout error:", error);
       toast.error("Logout failed");
     }
   };
