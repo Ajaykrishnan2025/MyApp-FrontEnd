@@ -5,13 +5,10 @@ import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-// ✅ Use your deployed backend URL from .env
+// ✅ Use your deployed backend URL
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-// Set Axios base URL
 axios.defaults.baseURL = backendUrl;
-
-// ✅ Must include credentials for cross-site cookies
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
@@ -32,6 +29,7 @@ export const AppContextProvider = ({ children }) => {
         setUserData(null);
       }
     } catch (error) {
+      // ✅ handle 401 gracefully
       setIsLoggedin(false);
       setUserData(null);
     } finally {
@@ -46,20 +44,29 @@ export const AppContextProvider = ({ children }) => {
       if (data.success) {
         setUserData(data.userData || data.user);
       } else {
-        toast.error("Failed to load user data");
+        // ✅ if 401, don’t break the app
+        if (data.message === "Not authenticated") {
+          console.warn("User not authenticated yet");
+        } else {
+          toast.error("Failed to load user data");
+        }
       }
     } catch (error) {
-      console.error("User data error:", error);
+      // ✅ catch Axios 401 error
+      if (error.response?.status === 401) {
+        console.warn("Local dev: user not logged in, ignoring 401");
+        setUserData(null);
+        setIsLoggedin(false);
+      } else {
+        console.error("User data error:", error);
+        toast.error("Failed to load user data");
+      }
     }
   };
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post(
-        "/api/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+      const { data } = await axios.post("/api/auth/login", { email, password }, { withCredentials: true });
 
       if (data.success) {
         await getUserData();
