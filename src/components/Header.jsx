@@ -3,7 +3,7 @@ import { assets } from '../assets/assets';
 import { AppContext } from '../context/AppContext'; // ✅ fixed import
 
 const Header = () => {
-  const { userData } = useContext(AppContext); // ✅ now fetched from backend
+  const { userData } = useContext(AppContext); // ✅ fixed useContext
 
   return (
     <div className="flex flex-col items-center mt-20 px-4 text-center">

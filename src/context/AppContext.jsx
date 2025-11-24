@@ -1,14 +1,13 @@
-// src/context/AppContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-// ✅ Use backend URL from environment variable
-export const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
+// ✅ Updated backend URL
+export const backendUrl = "https://auth-backend-rr3t.onrender.com";
 
-axios.defaults.withCredentials = true;
+axios.defaults.withCredentials = true; // ✅ must be true for cross-site cookies
 axios.defaults.baseURL = backendUrl;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
@@ -19,8 +18,7 @@ export const AppContextProvider = ({ children }) => {
 
   const getAuthState = async () => {
     try {
-      // ✅ FIXED ROUTE
-      const { data } = await axios.get("/api/auth/is-auth");
+      const { data } = await axios.get("/api/auth/is-auth"); // ✅ withCredentials ensures cookie sent
 
       if (data.success) {
         await getUserData();
@@ -39,7 +37,7 @@ export const AppContextProvider = ({ children }) => {
 
   const getUserData = async () => {
     try {
-      const { data } = await axios.get("/api/user/data");
+      const { data } = await axios.get("/api/user/data", { withCredentials: true }); // ✅ important
 
       if (data.success) {
         setUserData(data.userData || data.user);
@@ -53,7 +51,7 @@ export const AppContextProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const { data } = await axios.post("/api/auth/login", { email, password });
+      const { data } = await axios.post("/api/auth/login", { email, password }, { withCredentials: true });
 
       if (data.success) {
         await getUserData();
@@ -69,7 +67,7 @@ export const AppContextProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      const { data } = await axios.post("/api/auth/logout");
+      const { data } = await axios.post("/api/auth/logout", {}, { withCredentials: true });
 
       if (data.success) {
         setIsLoggedin(false);
