@@ -6,6 +6,9 @@ import { AppContext } from '../context/AppContext';
 const Header = () => {
   const { userData, loadingUser } = useContext(AppContext);
 
+  // ✅ Small tweak: detect local environment
+  const isLocal = window.location.hostname === "localhost";
+
   return (
     <div className="flex flex-col items-center mt-20 px-4 text-center">
       {/* Header Image */}
@@ -31,12 +34,13 @@ const Header = () => {
         Let’s explore how Gemini AI can help you create, learn, and chat smarter — all in one place!
       </p>
 
-      {/* Chatbot Button: only visible when user is loaded */}
-      {!loadingUser && userData && (
+      {/* Chatbot Button */}
+      {/* Show if logged in OR if running locally */}
+      {(!loadingUser && userData) || isLocal ? (
         <button className="border border-gray-500 rounded-full px-8 py-2.5 hover:bg-gray-100 transition-all">
           Open Chatbot
         </button>
-      )}
+      ) : null}
     </div>
   );
 };
