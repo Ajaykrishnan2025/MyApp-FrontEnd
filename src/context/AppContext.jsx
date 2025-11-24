@@ -5,7 +5,8 @@ import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-export const backendUrl = "http://localhost:4000"; // backend url
+// ✅ Use backend URL from environment variable
+export const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = backendUrl;

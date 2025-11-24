@@ -3,7 +3,7 @@ import { assets } from '../assets/assets';
 import { AppContext } from '../context/AppContext'; // ✅ fixed import
 
 const Header = () => {
-  const { userData } = useContext(AppContext); // ✅ fixed useContext
+  const { userData } = useContext(AppContext); // ✅ now fetched from backend
 
   return (
     <div className="flex flex-col items-center mt-20 px-4 text-center">
@@ -31,9 +31,9 @@ const Header = () => {
       </p>
 
       {/* Button */}
-      <button className="border border-gray-500 rounded-full px-8 py-2.5 hover:bg-gray-100 transition-all">
+      {/* <button className="border border-gray-500 rounded-full px-8 py-2.5 hover:bg-gray-100 transition-all">
         Get Started
-      </button>
+      </button> */}
     </div>
   );
 };
