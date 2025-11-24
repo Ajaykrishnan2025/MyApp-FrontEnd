@@ -1,3 +1,4 @@
+// src/components/Header.jsx
 import React, { useContext } from 'react';
 import { assets } from '../assets/assets';
 import { AppContext } from '../context/AppContext';
@@ -30,7 +31,7 @@ const Header = () => {
         Let’s explore how Gemini AI can help you create, learn, and chat smarter — all in one place!
       </p>
 
-      {/* Button: Show only if user is logged in */}
+      {/* Chatbot Button: only visible when user is loaded */}
       {!loadingUser && userData && (
         <button className="border border-gray-500 rounded-full px-8 py-2.5 hover:bg-gray-100 transition-all">
           Open Chatbot

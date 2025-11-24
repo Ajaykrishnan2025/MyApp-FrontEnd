@@ -5,11 +5,13 @@ import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-// ✅ Use your deployed backend URL
+// ✅ Use your deployed backend URL from .env
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
+// Set Axios base URL
 axios.defaults.baseURL = backendUrl;
-// ✅ Include credentials for cross-site cookies
+
+// ✅ Must include credentials for cross-site cookies
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
@@ -18,14 +20,9 @@ export const AppContextProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  // -------------------------
-  // GET AUTH STATE
-  // -------------------------
   const getAuthState = async () => {
     try {
-      const { data } = await axios.get("/api/auth/is-auth", {
-        withCredentials: true,
-      });
+      const { data } = await axios.get("/api/auth/is-auth", { withCredentials: true });
 
       if (data.success) {
         await getUserData();
@@ -35,7 +32,6 @@ export const AppContextProvider = ({ children }) => {
         setUserData(null);
       }
     } catch (error) {
-      console.error("Auth state error:", error);
       setIsLoggedin(false);
       setUserData(null);
     } finally {
@@ -43,30 +39,20 @@ export const AppContextProvider = ({ children }) => {
     }
   };
 
-  // -------------------------
-  // GET USER DATA
-  // -------------------------
   const getUserData = async () => {
     try {
-      const { data } = await axios.get("/api/user/data", {
-        withCredentials: true, // ✅ ensures cookie sent
-      });
+      const { data } = await axios.get("/api/user/data", { withCredentials: true });
 
       if (data.success) {
         setUserData(data.userData || data.user);
       } else {
         toast.error("Failed to load user data");
-        setUserData(null);
       }
     } catch (error) {
       console.error("User data error:", error);
-      setUserData(null);
     }
   };
 
-  // -------------------------
-  // LOGIN
-  // -------------------------
   const login = async (email, password) => {
     try {
       const { data } = await axios.post(
@@ -83,21 +69,13 @@ export const AppContextProvider = ({ children }) => {
         toast.error(data.message || "Login failed");
       }
     } catch (error) {
-      console.error("Login error:", error);
       toast.error(error.response?.data?.message || "Login error");
     }
   };
 
-  // -------------------------
-  // LOGOUT
-  // -------------------------
   const logout = async () => {
     try {
-      const { data } = await axios.post(
-        "/api/auth/logout",
-        {},
-        { withCredentials: true }
-      );
+      const { data } = await axios.post("/api/auth/logout", {}, { withCredentials: true });
 
       if (data.success) {
         setIsLoggedin(false);
@@ -105,7 +83,6 @@ export const AppContextProvider = ({ children }) => {
         toast.success("Logged out");
       }
     } catch (error) {
-      console.error("Logout error:", error);
       toast.error("Logout failed");
     }
   };
