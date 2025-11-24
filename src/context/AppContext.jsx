@@ -1,11 +1,16 @@
+// src/context/AppContext.jsx
 import React, { createContext, useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 
 export const AppContext = createContext();
+
+// ✅ Use your deployed backend URL
 export const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 axios.defaults.baseURL = backendUrl;
+
+// ✅ MUST include credentials for cookies to work cross-site
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Content-Type"] = "application/json";
 
@@ -14,11 +19,12 @@ export const AppContextProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loadingUser, setLoadingUser] = useState(true);
 
-  const isLocal = window.location.hostname === "localhost";
+  const isLocal = window.location.hostname === "localhost"; // ✅ detect local dev
 
   const getAuthState = async () => {
     try {
       const { data } = await axios.get("/api/auth/is-auth", { withCredentials: true });
+
       if (data.success) {
         await getUserData();
         setIsLoggedin(true);
@@ -27,9 +33,6 @@ export const AppContextProvider = ({ children }) => {
         setUserData(null);
       }
     } catch (error) {
-      if (!isLocal || error.response?.status !== 401) {
-        console.error("Auth state error:", error);
-      }
       setIsLoggedin(false);
       setUserData(null);
     } finally {
@@ -40,23 +43,26 @@ export const AppContextProvider = ({ children }) => {
   const getUserData = async () => {
     try {
       const { data } = await axios.get("/api/user/data", { withCredentials: true });
+
       if (data.success) {
         setUserData(data.userData || data.user);
-      } else {
+      } else if (!isLocal) {
         toast.error("Failed to load user data");
       }
     } catch (error) {
       if (!isLocal || error.response?.status !== 401) {
         console.error("User data error:", error);
       }
+      setUserData(null);
     }
   };
 
   const login = async (email, password) => {
     try {
       const { data } = await axios.post("/api/auth/login", { email, password }, { withCredentials: true });
+
       if (data.success) {
-        await getUserData();
+        await getUserData(); // ✅ ensures userData is set after login
         setIsLoggedin(true);
         toast.success("Login successful");
       } else {
@@ -70,6 +76,7 @@ export const AppContextProvider = ({ children }) => {
   const logout = async () => {
     try {
       const { data } = await axios.post("/api/auth/logout", {}, { withCredentials: true });
+
       if (data.success) {
         setIsLoggedin(false);
         setUserData(null);
@@ -84,21 +91,17 @@ export const AppContextProvider = ({ children }) => {
     getAuthState();
   }, []);
 
-  return (
-    <AppContext.Provider
-      value={{
-        isLoggedin,
-        setIsLoggedin,
-        userData,
-        setUserData,
-        getUserData,
-        backendUrl,
-        login,
-        logout,
-        loadingUser,
-      }}
-    >
-      {children}
-    </AppContext.Provider>
-  );
+  const value = {
+    isLoggedin,
+    setIsLoggedin,
+    userData,
+    setUserData,
+    getUserData,
+    backendUrl,
+    login,
+    logout,
+    loadingUser,
+  };
+
+  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
