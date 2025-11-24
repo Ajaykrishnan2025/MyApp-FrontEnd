@@ -44,13 +44,17 @@ const Login = () => {
           return;
         }
 
-        if (data.success) {
-          await getUserData(); // ✅ fetch userData first
-          setIsLoggedin(true);
-          localStorage.setItem("isVerified", "true");
-          toast.success("Login successful!");
-          navigate("/");
-        } else toast.error(data.message);
+            if (data.success) {
+              localStorage.setItem("token", data.token); // ⭐ SAVE TOKEN
+              localStorage.setItem("isVerified", "true");
+
+              await getUserData();
+              setIsLoggedin(true);
+
+              toast.success("Login successful!");
+              navigate("/");
+            }
+ else toast.error(data.message);
       }
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong");

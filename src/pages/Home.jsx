@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import Navbar from "../components/Navbar";
 import Header from "../components/Header";
 import { useNavigate } from "react-router-dom";
@@ -6,16 +6,13 @@ import { AppContext } from "../context/AppContext";
 
 const Home = () => {
   const navigate = useNavigate();
-  const { isLoggedin } = useContext(AppContext);
+  const { isLoggedin, userData } = useContext(AppContext);
 
-  const token = localStorage.getItem("token");
-  const isVerified = localStorage.getItem("isVerified") === "true";
-
-  // 🔥 FIXED (only this line changed)
+  // 🔥 Correct authentication + verification check
   const isAuthenticated =
     isLoggedin &&
-    token &&
-    isVerified;
+   userData?.isAccountVerified === true;
+
 
   return (
     <div className="min-h-screen flex flex-col bg-center bg-cover bg-[url('/bg_img.png')]">

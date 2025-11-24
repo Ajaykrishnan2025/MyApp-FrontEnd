@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 
 export const AppContext = createContext();
 
-export const backendUrl = "http://localhost:4000"; // ✅ correct backend
+export const backendUrl = "http://localhost:4000"; // backend url
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = backendUrl;
@@ -14,14 +14,15 @@ axios.defaults.headers.common["Content-Type"] = "application/json";
 export const AppContextProvider = ({ children }) => {
   const [isLoggedin, setIsLoggedin] = useState(false);
   const [userData, setUserData] = useState(null);
-  const [loadingUser, setLoadingUser] = useState(true); // ✅ new loading flag
+  const [loadingUser, setLoadingUser] = useState(true);
 
   const getAuthState = async () => {
     try {
+      // ✅ FIXED ROUTE
       const { data } = await axios.get("/api/auth/is-auth");
 
       if (data.success) {
-        await getUserData(); // fetch userData first
+        await getUserData();
         setIsLoggedin(true);
       } else {
         setIsLoggedin(false);
@@ -31,7 +32,7 @@ export const AppContextProvider = ({ children }) => {
       setIsLoggedin(false);
       setUserData(null);
     } finally {
-      setLoadingUser(false); // ✅ done loading
+      setLoadingUser(false);
     }
   };
 
@@ -54,9 +55,8 @@ export const AppContextProvider = ({ children }) => {
       const { data } = await axios.post("/api/auth/login", { email, password });
 
       if (data.success) {
-        await getUserData(); // ✅ fetch userData first
+        await getUserData();
         setIsLoggedin(true);
-        localStorage.setItem("isVerified", "true");
         toast.success("Login successful");
       } else {
         toast.error(data.message || "Login failed");
@@ -73,10 +73,6 @@ export const AppContextProvider = ({ children }) => {
       if (data.success) {
         setIsLoggedin(false);
         setUserData(null);
-
-        localStorage.removeItem("token");
-        localStorage.removeItem("isVerified");
-
         toast.success("Logged out");
       }
     } catch (error) {
@@ -97,7 +93,7 @@ export const AppContextProvider = ({ children }) => {
     backendUrl,
     login,
     logout,
-    loadingUser, // ✅ export flag
+    loadingUser,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
